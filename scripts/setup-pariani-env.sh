@@ -56,7 +56,7 @@ for arg in "$@"; do
             echo ""
             echo "Defaults:"
             echo "  DISTRO  = pariani-st"
-            echo "  MACHINE = stm32mp1-disco"
+            echo "  MACHINE = stm32mp151-myir-cls"
             echo ""
             echo "Examples:"
             echo "  source setup-pariani-env.sh"
@@ -108,7 +108,7 @@ TEMPLATECONF="${PARIANI_LAYER}/conf/templates/default"
 # Defaults
 # ----------------------------------------------------------------------------
 DISTRO=${DISTRO_ARG:-pariani-st}
-MACHINE=${MACHINE_ARG:-stm32mp1-disco}
+MACHINE=${MACHINE_ARG:-stm32mp151-myir-cls}
 BUILD_DIR="${ROOTOE}/build-${DISTRO}-${MACHINE}"
 
 # ----------------------------------------------------------------------------
@@ -214,6 +214,7 @@ echo -e " Machine         : ${MACHINE}"
 echo ""
 echo -e "To build your image, run:"
 echo -e "  ${YELLOW}bitbake st-image-weston${NC}"
+echo -e "  ${YELLOW}bitbake pariani-qt-min-image${NC}"
 echo ""
 echo -e "To reset configuration, rerun with:"
 echo -e "  ${YELLOW}source setup-pariani-env.sh --reset${NC}"

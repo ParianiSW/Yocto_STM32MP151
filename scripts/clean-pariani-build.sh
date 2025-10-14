@@ -9,7 +9,7 @@
 #    ./clean-pariani-build.sh [build_dir] [--sstate]
 #
 #  Defaults:
-#    build_dir = build-pariani-st-stm32mp1-disco
+#    build_dir = build-pariani-st-stm32mp1-myir
 # ============================================================================
 set -e
 
@@ -36,7 +36,7 @@ fi
 # ----------------------------------------------------------------------------
 # Defaults
 # ----------------------------------------------------------------------------
-DEFAULT_BUILD_DIR="build-pariani-st-stm32mp1-disco"
+DEFAULT_BUILD_DIR="build-pariani-st-stm32mp1-myir"
 
 BUILD_DIR_INPUT="$1"
 EXTRA_OPTION="$2"
@@ -101,7 +101,7 @@ echo -e "${GREEN}--------------------------------------------------------------$
 # ----------------------------------------------------------------------------
 # Confirmation
 # ----------------------------------------------------------------------------
-read -p "Proceed with cleanup of ${BUILD_DIR}? [y/N]: " confirm
+read -r -p "Proceed with cleanup of ${BUILD_DIR}? [y/N]: " confirm
 if [[ ! "$confirm" =~ ^[yY]$ ]]; then
     echo "Aborted."
     exit 0
