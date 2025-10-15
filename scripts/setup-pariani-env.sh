@@ -187,7 +187,7 @@ CONF_DIR="${BUILD_DIR}/conf"
 if [ ! -f "${CONF_DIR}/local.conf" ]; then
     echo -e "${BLUE}[INFO]${NC} Creating new local.conf ..."
     mkdir -p "${CONF_DIR}"
-    cp "${TEMPLATECONF}/local.conf.sample" "${CONF_DIR}/local.conf" 2>/dev/nul
+    cp "${TEMPLATECONF}/local.conf.sample" "${CONF_DIR}/local.conf" 2>/dev/null
 #    cp "${TEMPLATECONF}/local.conf.sample" "${CONF_DIR}/local.conf" 2>/dev/null || true
 #    {
 #        echo ""
