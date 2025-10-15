@@ -22,6 +22,15 @@ RED='\033[1;31m'
 NC='\033[0m'
 
 # ----------------------------------------------------------------------------
+# Prevent sourcing
+# ----------------------------------------------------------------------------
+if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
+    echo -e "\033[1;31m[ERROR]\033[0m This script must not be sourced."
+    echo "Please run it directly: ./clean-pariani-build.sh [options]"
+    kill -INT $$
+fi
+
+# ----------------------------------------------------------------------------
 # Detect project root (directory containing "layers/")
 # ----------------------------------------------------------------------------
 ROOTOE=$PWD
@@ -31,15 +40,25 @@ done
 
 if [ ! -d "${ROOTOE}/layers" ]; then
     echo -e "${RED}[ERROR]${NC} Could not locate Yocto project root (no 'layers/' found)."
-    return 1
+    exit 1
 fi
 # ----------------------------------------------------------------------------
 # Defaults
 # ----------------------------------------------------------------------------
-DEFAULT_BUILD_DIR="build-pariani-st-stm32mp1-myir"
+DEFAULT_BUILD_DIR="build-pariani-st-stm32mp151-myir-cls"
 
 BUILD_DIR_INPUT="$1"
 EXTRA_OPTION="$2"
+
+# ----------------------------------------------------------------------------
+# Allow out of order arguments
+# ----------------------------------------------------------------------------
+if [[ "$1" == "--sstate" ]]; then
+    EXTRA_OPTION="--sstate"
+    BUILD_DIR_INPUT=""
+elif [[ "$2" == "--sstate" ]]; then
+    EXTRA_OPTION="--sstate"
+fi
 
 # ----------------------------------------------------------------------------
 # Help Option
@@ -169,6 +188,5 @@ if [[ "$EXTRA_OPTION" == "--sstate" ]]; then
     echo -e "${GREEN}(includes BitBake cleansstate world)${NC}"
 fi
 echo ""
-echo -e "You can now rebuild using:"
-echo -e "  ${YELLOW}bitbake st-image-weston${NC}"
+echo -e "Done"
 echo ""
