@@ -95,12 +95,18 @@ if [ ! -d "${ROOTOE}/layers" ]; then
     return 1
 fi
 
-# Auto-detect top directory (script may be in scripts/)
-#ROOTOE=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
-#echo -e "  ${ROOTOE}"
-#ROOTOE=$(realpath "${ROOTOE}/..")
-echo "  ${ROOTOE}"
-OECORE_PATH="${ROOTOE}/layers/openembedded-core"
+# ----------------------------------------------------------------------------
+# Determine build system root
+# ----------------------------------------------------------------------------
+if [ -d "${ROOTOE}/layers/poky" ]; then
+    OECORE_PATH="${ROOTOE}/layers/poky"
+elif [ -d "${ROOTOE}/layers/openembedded-core" ]; then
+    OECORE_PATH="${ROOTOE}/layers/openembedded-core"
+else
+    echo -e "${RED}[ERROR]${NC} Neither poky nor openembedded-core found under layers/."
+    return 1
+fi
+
 PARIANI_LAYER="${ROOTOE}/layers/Yocto_STM32MP151/meta-pariani"
 TEMPLATECONF="${PARIANI_LAYER}/conf/templates/default"
 
@@ -134,7 +140,7 @@ fi
 # Sanity checks
 # ----------------------------------------------------------------------------
 if [ ! -d "${OECORE_PATH}" ]; then
-    echo -e "${RED}[ERROR]${NC} Missing openembedded-core at ${OECORE_PATH}"
+    echo -e "${RED}[ERROR]${NC} Missing openembedded-core/poky at ${OECORE_PATH}"
     return 1
 fi
 
@@ -144,7 +150,7 @@ if [ ! -d "${PARIANI_LAYER}" ]; then
 fi
 
 if [ ! -f "${OECORE_PATH}/oe-init-build-env" ]; then
-    echo -e "${RED}[ERROR]${NC} Missing oe-init-build-env in openembedded-core."
+    echo -e "${RED}[ERROR]${NC} Missing oe-init-build-env in ${OECORE_PATH}."
     return 1
 fi
 
@@ -156,9 +162,9 @@ echo -e "${GREEN}     Pariani Yocto Build Environment Setup${NC}"
 echo -e "${GREEN}==============================================================${NC}"
 echo -e "${YELLOW}ROOTOE :${NC}  ${ROOTOE}"
 echo -e "${YELLOW}oecore  :${NC} ${OECORE_PATH}"
-echo -e "${YELLOW}Distro :${NC}  ${DISTRO}"
-echo -e "${YELLOW}Machine:${NC}  ${MACHINE}"
-echo -e "${YELLOW}Build  :${NC}  ${BUILD_DIR}"
+echo -e "${YELLOW}Distro  :${NC} ${DISTRO}"
+echo -e "${YELLOW}Machine :${NC} ${MACHINE}"
+echo -e "${YELLOW}Build   :${NC} ${BUILD_DIR}"
 echo -e "${YELLOW}Template:${NC} ${TEMPLATECONF}"
 echo -e "${GREEN}--------------------------------------------------------------${NC}"
 
@@ -173,7 +179,7 @@ fi
 # ----------------------------------------------------------------------------
 # Initialize environment
 # ----------------------------------------------------------------------------
-echo -e "${BLUE}[INFO]${NC} Initializing oe-core environment ..."
+echo -e "${BLUE}[INFO]${NC} Initializing OpenEmbedded environment ..."
 mkdir -p "${BUILD_DIR}"
 export TEMPLATECONF DISTRO MACHINE
 source "${OECORE_PATH}/oe-init-build-env" "${BUILD_DIR}"
@@ -188,19 +194,12 @@ if [ ! -f "${CONF_DIR}/local.conf" ]; then
     echo -e "${BLUE}[INFO]${NC} Creating new local.conf ..."
     mkdir -p "${CONF_DIR}"
     cp "${TEMPLATECONF}/local.conf.sample" "${CONF_DIR}/local.conf" 2>/dev/null
-#    cp "${TEMPLATECONF}/local.conf.sample" "${CONF_DIR}/local.conf" 2>/dev/null || true
-#    {
-#        echo ""
-#        echo "MACHINE = \"${MACHINE}\""
-#        echo "DISTRO = \"${DISTRO}\""
-#    } >> "${CONF_DIR}/local.conf"
-
 fi
 
 if [ ! -f "${CONF_DIR}/bblayers.conf" ]; then
     echo -e "${BLUE}[INFO]${NC} Creating new bblayers.conf ..."
     mkdir -p "${CONF_DIR}"
-    cp "${TEMPLATECONF}/bblayers.conf.sample" "${CONF_DIR}/bblayers.conf" 2>/dev/null || true
+    cp "${TEMPLATECONF}/bblayers.conf.sample" "${CONF_DIR}/bblayers.conf" 2>/dev/null
 fi
 
 # ----------------------------------------------------------------------------
@@ -213,8 +212,8 @@ echo -e " Distro          : ${DISTRO}"
 echo -e " Machine         : ${MACHINE}"
 echo ""
 echo -e "To build your image, run:"
-echo -e "  ${YELLOW}bitbake st-image-weston${NC}"
-echo -e "  ${YELLOW}bitbake pariani-qt-min-image${NC}"
+echo -e "  ${YELLOW}bitbake pariani-qt-min-image${NC}   # main Pariani image"
+echo -e "  ${YELLOW}bitbake st-image-weston${NC}       # base ST image"
 echo ""
 echo -e "To reset configuration, rerun with:"
 echo -e "  ${YELLOW}source setup-pariani-env.sh --reset${NC}"
