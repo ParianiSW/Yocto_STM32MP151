@@ -2,10 +2,20 @@ SUMMARY = "Pariani STM32MP1 image with Qt5 (Widgets only) on Wayland"
 DESCRIPTION = "Customized Weston image for Pariani-MYIR platform"
 LICENSE = "Proprietary"
 
+#Note:
+#This image replaces st-image-weston as the rootfs in the ST FlashLayout.
+#Make sure that FLASHLAYOUT_CONFIG_IMAGE[rootfs] points to this image.
+
+# --- RootFS naming ----------------------------------------------------------
+# Optional fallback
+IMAGE_NAME_SUFFIX = ".rootfs"
 
 # Include the base ST Weston image recipe as a foundation.
 # This allows inheriting all its configuration, features, and package groups.
 require recipes-st/images/st-image-weston.bb
+
+# This allows inheriting st partitions image scheme
+inherit st-partitions-image
 
 # --- Image feature extensions ----------------------------------------------
 # Add or remove features compared to the base image.
