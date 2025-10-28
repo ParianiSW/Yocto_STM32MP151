@@ -33,3 +33,12 @@ IMAGE_INSTALL:remove = "packagegroup-st-demo"
 # in the snippet included by the distro configuration
 # (meta-pariani/conf/snippets/qt5-minimal-scarthgap.conf)
 # (meta-pariani/conf/snippets/...)
+
+# -----------------------------------------------------------------------------
+# Build-time information
+# -----------------------------------------------------------------------------
+python do_image_complete:append() {
+    eula = d.getVar("EULA_FILE_ST") or "undefined"
+    bb.plain("\033[1;32m[meta-pariani]\033[0m Using local EULA file: %s" % eula)
+}
+
