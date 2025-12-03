@@ -1,7 +1,22 @@
 # SPDX-License-Identifier: (GPL-2.0-only OR BSD-3-Clause)
 
+dtb-$(CONFIG_STM32MP13X) += \
+
+
 dtb-$(CONFIG_STM32MP15X) += \
-	stm32mp151a-ap31085500a-mx.dtb
+     stm32mp151a-ap31085500a-mx.dtb \
+     stm32mp151a-ap31085500a-mx.dtb \
+     stm32mp151a-ap31085500a-mx.dtb \
+
+
+dtb-$(CONFIG_STM32MP21X) += \
+
+
+dtb-$(CONFIG_STM32MP23X) += \
+
+
+dtb-$(CONFIG_STM32MP25X) += \
+
 
 #include $(srctree)/scripts/Makefile.dts
 

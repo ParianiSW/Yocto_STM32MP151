@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-3-Clause)
 /*
- * Copyright (C) 2025, STMicroelectronics - All Rights Reserved
+ * Copyright (C) 2024, STMicroelectronics - All Rights Reserved
  * Author: STM32CubeMX code generation for STMicroelectronics.
  */
 
@@ -8,12 +8,28 @@
  * https://wiki.st.com/stm32mpu/wiki/Category:Device_tree_configuration
  */
 
+/* !!! log : Internal error - unknown 'U-BOOT' dtsi  !!! */
+/*#include "???.dtsi"*/
+
 /* USER CODE BEGIN includes */
 /* USER CODE END includes */
 
 / {
 
 	/* USER CODE BEGIN root */
+ pariani_binman: binman {
+		filename = "u-boot-dtb.bin";
+
+		u_boot_bin: blob@0 {
+			filename = "u-boot.bin";
+			pad-byte = <0xff>;
+			align-size = <4>;
+		};
+
+		u_boot_dtb: blob@1 {
+			filename = "u-boot.dtb";
+		};
+	};
 	/* USER CODE END root */
 
 }; /*root*/
