@@ -26,7 +26,7 @@
 /*TFA*/
 
 / {
-	model = "STMicroelectronics custom STM32CubeMX board - openstlinux-6.1-yocto-mickledore-mpu-v24.06.26";
+	model = "STMicroelectronics custom STM32CubeMX board - openstlinux-6.6-yocto-scarthgap-mpu-v25.06.11";
 	compatible = "st,stm32mp151a-ap31085500a-mx", "st,stm32mp151";
 
 	memory@c0000000 {
@@ -36,7 +36,7 @@
 		/* USER CODE BEGIN memory */
 		/* USER CODE END memory */
 	};
-
+#if 0
 	reserved-memory {
 		#address-cells = <1>;
 		#size-cells = <1>;
@@ -80,6 +80,7 @@
       
 		/* USER CODE END reserved-memory */
 	};
+#endif
 	/* USER CODE BEGIN root */
 	
 	aliases {
@@ -186,6 +187,7 @@
 
 
 &pinctrl_z {
+/*move i2c4 here*/
 	/* USER CODE BEGIN pinctrl_z */
 	/* USER CODE END pinctrl_z */
 };
@@ -203,25 +205,28 @@
 	pmic: stpmic@33 {
 	compatible = "st,stpmic1";
 	reg = <0x33>;
-	/* interrupts-extended = <&exti_pwr 55 IRQ_TYPE_EDGE_FALLING>;*/
-	interrupts-extended = <&exti 55 IRQ_TYPE_EDGE_FALLING>;
+	interrupts-extended = <&exti_pwr 55 IRQ_TYPE_EDGE_FALLING>;
+/*	interrupts-extended = <&exti 55 IRQ_TYPE_EDGE_FALLING>; */
 	interrupt-controller;
 	#interrupt-cells = <2>;
 	status = "okay";
 
 		regulators {
 			compatible = "st,stpmic1-regulators";
-			
 			buck1-supply = <&vin>;
 			buck2-supply = <&vin>;
 			buck3-supply = <&vin>;
 			buck4-supply = <&vin>;
+			ldo1-supply = <&v3v3>;
 			ldo2-supply  = <&vin>;
-			ldo3-supply  = <&vdd>;         /* VTT_DDR must be fed from BUCK3 */
+			ldo3-supply = <&vdd_ddr>;
 			ldo4-supply  = <&vin>;
 			ldo5-supply  = <&vin>;
 			ldo6-supply  = <&v3v3>;
-			vref_ddr-supply = <&vdd_ddr>;  /* VREF must follow VDD_DDR */
+			vref_ddr-supply = <&vin>;
+			boost-supply = <&vin>;
+			pwr_sw1-supply = <&bst_out>;
+			pwr_sw2-supply = <&bst_out>;
 
 			vddcore: buck1 {
 				regulator-name = "vddcore";
@@ -230,23 +235,15 @@
 				regulator-always-on;
 				regulator-initial-mode = <0>;
 				regulator-over-current-protection;
-
-				lp-stop {
-					regulator-on-in-suspend;
-				};
 			};
 
-			vdd_ddr: buck2 {
+			vdd_ddr:buck2{
 				regulator-name = "vdd_ddr";
 				regulator-min-microvolt = <1350000>;
 				regulator-max-microvolt = <1350000>;
 				regulator-always-on;
 				regulator-initial-mode = <0>;
 				regulator-over-current-protection;
-
-				lp-stop {
-					regulator-on-in-suspend;
-				};
 			};
 
 			vdd: buck3 {
@@ -257,9 +254,6 @@
 				st,mask-reset;
 				regulator-initial-mode = <0>;
 				regulator-over-current-protection;
-				lp-stop {
-					regulator-on-in-suspend;
-				};
 			};
 
 			v3v3: buck4 {
@@ -269,77 +263,89 @@
 				regulator-always-on;
 				regulator-over-current-protection;
 				regulator-initial-mode = <0>;
-
-				lp-stop {
-					regulator-on-in-suspend;
-				};
 			};
 
-			/*
-			v1v8_audio: ldo1 {
+			v1v8_audio:ldo1{
 				regulator-name = "v1v8_audio";
 				regulator-min-microvolt = <1800000>;
 				regulator-max-microvolt = <1800000>;
 				regulator-always-on;
-				interrupts = <IT_CURLIM_LDO1 0>;
 			};
-			*/
-			vtt_ddr: ldo3 {
+
+			v3v3_hdmi:ldo2{
+				regulator-name = "v3v3_hdmi";
+				regulator-min-microvolt = <3300000>;
+				regulator-max-microvolt = <3300000>;
+				regulator-always-on;
+			};
+
+			vtt_ddr:ldo3{
 				regulator-name = "vtt_ddr";
 				regulator-always-on;
+				regulator-over-current-protection;
 				st,regulator-sink-source;
-				/*
-				NOT WORKING IN TFA
-				regulator-min-microvolt = <500000>;
-				regulator-max-microvolt = <750000>;
-				*/
-				/* nessuna gestione di suspend: resta sempre on */
 			};
-			
+
+			vdd_usb:ldo4{
+				regulator-name = "vdd_usb";
+				regulator-min-microvolt = <3300000>;
+				regulator-max-microvolt = <3300000>;
+			};
+
+			vdda:ldo5{
+				regulator-name = "vdda";
+				regulator-min-microvolt = <2900000>;
+				regulator-max-microvolt = <2900000>;
+				regulator-boot-on;
+			};
+
+			v1v2_hdmi:ldo6{
+				regulator-name = "v1v2_hdmi";
+				regulator-min-microvolt = <1200000>;
+				regulator-max-microvolt = <1200000>;
+				regulator-always-on;
+			};
 
 			vref_ddr: vref_ddr {
 				regulator-name = "vref_ddr";
 				regulator-always-on;
-
-				lp-stop {
-					regulator-on-in-suspend;
-				};
 			};
 
-			/*
 			bst_out: boost {
 				regulator-name = "bst_out";
-				interrupts = <IT_OCP_BOOST 0>;
 			};
 
 			vbus_otg: pwr_sw1 {
 				regulator-name = "vbus_otg";
-				interrupts = <IT_OCP_OTG 0>;
 			};
 
 			vbus_sw: pwr_sw2 {
 				regulator-name = "vbus_sw";
-				interrupts = <IT_OCP_SWOUT 0>;
 				regulator-active-discharge = <1>;
 			};
-			*/
 		};
 	};
 
 	/* USER CODE END i2c4 */
 };
 
+&iwdg1 {
+	status = "okay";
+	/* USER CODE BEGIN iwdg1 */
+	timeout-sec = <32>;
+	/* USER CODE END iwdg1 */
+};
 &rcc{
 	status = "okay";
-
 	/* USER CODE BEGIN rcc */
-	/* CLK_CKPER_DISABLED -> CLK_CKPER_HSE */
-	/* USER CODE END rcc */
+	compatible = "st,stm32mp1-rcc-secure", "st,stm32mp1-rcc", "syscon";
 
+	/* USER CODE END rcc */
 	st,clksrc = <
 		CLK_CKPER_HSE
 		CLK_SDMMC12_PLL4P
 		CLK_STGEN_HSE
+		CLK_USBPHY_HSE
 		CLK_I2C46_HSI
 		CLK_USBO_USBPHY
 		CLK_UART24_HSI
@@ -356,16 +362,11 @@
 		DIV(DIV_APB3, 1)
 		DIV(DIV_APB4, 1)
 		DIV(DIV_APB5, 2)
-		DIV(DIV_RTC, 0)
+		DIV(DIV_RTC, 23)
 		DIV(DIV_MCO1, 0)
 		DIV(DIV_MCO2, 0)
 	>;
 	st,pll_vco {
-		pll1_vco_1300Mhz: pll1-vco-1300Mhz {
-			src = < CLK_PLL12_HSE >;
-			divmn = < 2 80 >;
-			frac = < 0x800 >;
-		};
 		pll2_vco_1066Mhz: pll2-vco-1066Mhz {
 			src = < CLK_PLL12_HSE >;
 			divmn = < 2 65 >;
@@ -384,20 +385,6 @@
 		/* USER CODE END rcc_st-pll_vco */
 	};
 
-	pll1:st,pll@0 {
-		compatible = "st,stm32mp1-pll";
-		reg = <0>;
-
-		st,pll = < &pll1_cfg1 >;
-
-		pll1_cfg1: pll1_cfg1 {
-			st,pll_vco = < &pll1_vco_1300Mhz >;
-			st,pll_div_pqr = < 0 1 1 >;
-		};
-		/* USER CODE BEGIN pll1 */
-		/* USER CODE END pll1 */
-	};
-
 	pll2:st,pll@1 {
 		compatible = "st,stm32mp1-pll";
 		reg = <1>;
@@ -406,7 +393,7 @@
 
 		pll2_cfg1: pll2_cfg1 {
 			st,pll_vco = < &pll2_vco_1066Mhz >;
-			st,pll_div_pqr = < 1 1 0 >;
+			st,pll_div_pqr = < 1 0 0 >;
 		};
 		/* USER CODE BEGIN pll2 */
 		/* USER CODE END pll2 */
@@ -434,7 +421,7 @@
 
 		pll4_cfg1: pll4_cfg1 {
 			st,pll_vco = < &pll4_vco_594Mhz >;
-			st,pll_div_pqr = < 59 7 7 >;
+			st,pll_div_pqr = < 5 7 7 >;
 		};
 		/* USER CODE BEGIN pll4 */
 		/* USER CODE END pll4 */
@@ -491,6 +478,8 @@
 	status = "okay";
 
 	/* USER CODE BEGIN usbphyc_port0 */
+	phy-supply = <&vdd_usb>;
+
 	/* USER CODE END usbphyc_port0 */
 };
 
@@ -498,39 +487,42 @@
 	status = "okay";
 
 	/* USER CODE BEGIN usbphyc_port1 */
+	phy-supply = <&vdd_usb>;
+
 	/* USER CODE END usbphyc_port1 */
 };
 
 /* USER CODE BEGIN addons */
+
 &bsec {
-	board_id: board_id@ec {
+
+	board_id:board_id@ec{
 		reg = <0xec 0x4>;
 		st,non-secure-otp;
 	};
-};
-
-&clk_hse {
-	st,digbypass;
 };
 
 &cpu0 {
 	cpu-supply = <&vddcore>;
 };
 
-&pwr_regulators{
-	vdd-supply = <&vdd>;
-};
-
-&ddr
-{
+&ddr {
     vdd-supply = <&vdd_ddr>;
     vtt-supply = <&vtt_ddr>;
     vref-supply = <&vref_ddr>;
 };
 
+&pwr_regulators {
+	vdd-supply = <&vdd>;
+	vdd_3v3_usbfs-supply = <&vdd_usb>;
+};
+
 &rng1 {
         status = "okay";
-        secure-status = "okay";
+};
+
+&rtc {
+	status = "okay";
 };
 
 /* USER CODE END addons */

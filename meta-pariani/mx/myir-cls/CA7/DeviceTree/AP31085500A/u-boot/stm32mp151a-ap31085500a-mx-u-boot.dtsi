@@ -8,29 +8,14 @@
  * https://wiki.st.com/stm32mpu/wiki/Category:Device_tree_configuration
  */
 
-/* !!! log : Internal error - unknown 'U-BOOT' dtsi  !!! */
-/*#include "???.dtsi"*/
-
 /* USER CODE BEGIN includes */
+#include "stm32mp15-scmi-u-boot.dtsi"
 /* USER CODE END includes */
 
 / {
 
 	/* USER CODE BEGIN root */
- pariani_binman: binman {
-		filename = "u-boot-dtb.bin";
-
-		u_boot_bin: blob@0 {
-			filename = "u-boot.bin";
-			pad-byte = <0xff>;
-			align-size = <4>;
-		};
-
-		u_boot_dtb: blob@1 {
-			filename = "u-boot.dtb";
-		};
-	};
-	/* USER CODE END root */
+ 	/* USER CODE END root */
 
 }; /*root*/
 
