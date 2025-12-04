@@ -17,16 +17,18 @@
 
 # Enable build-time trace variable to inject log settings
 ST_OPTEE_DEBUG_TRACE = "1"              
-ST_OPTEE_DEBUG_LOG_LEVEL = "4"           
+ST_OPTEE_DEBUG_LOG_LEVEL = "2"           
 ST_OPTEE_CORE_DEBUG:forcevariable = "y"
 ST_OPTEE_CORE_DEBUG_INFO:forcevariable = "y"
 
 # Append these flags to EXTRA_OEMAKE so they override defaults
 EXTRA_OEMAKE:append = " CFG_TEE_CORE_LOG_LEVEL=${ST_OPTEE_DEBUG_LOG_LEVEL} CFG_TEE_CORE_DEBUG=${ST_OPTEE_CORE_DEBUG} CFG_TEE_CORE_DEBUG_INFO=${ST_OPTEE_CORE_DEBUG_INFO}"
 
+##################################################################
 
 # Optional: explicitly mark build as release
 #EXTRA_OEMAKE:append = " CFG_TEE_CORE_DEBUG_INFO=n CFG_UNWIND=n NOWERROR=1"
+
 
 # -----------------------------------------------------------------------------
 # Pariani build log banner (console message)
