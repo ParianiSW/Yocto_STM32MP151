@@ -27,7 +27,7 @@ IMAGE_FEATURES += "\
 # --- Package removals -------------------------------------------------------
 # Optionally remove unwanted package groups from the base ST image.
 # This helps reduce image size or remove demo apps.
-IMAGE_INSTALL:remove = "packagegroup-st-demo"
+#IMAGE_INSTALL:remove = "packagegroup-st-demo"
 
 # Additional Qt packages and configurations are defined
 # in the snippet included by the distro configuration
