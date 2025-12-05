@@ -36,51 +36,7 @@
 		/* USER CODE BEGIN memory */
 		/* USER CODE END memory */
 	};
-#if 0
-	reserved-memory {
-		#address-cells = <1>;
-		#size-cells = <1>;
-		ranges;
 
-		/* USER CODE BEGIN reserved-memory */
-		mcusram1:mcuram@10000000{
-			compatible = "shared-dma-pool";
-			reg = <0x10000000 0x20000>;
-			no-map;
-		};
-
-		mcusram2:mcuram@10020000{
-			compatible = "shared-dma-pool";
-			reg = <0x10020000 0x20000>;
-			no-map;
-		};
-
-		mcusram3:mcuram@10040000{
-			compatible = "shared-dma-pool";
-			reg = <0x10040000 0x10000>;
-			no-map;
-		};
-
-		retram:retram@38000000{
-			compatible = "shared-dma-pool";
-			reg = <0x38000000 0x10000>;
-			no-map;
-		};
-		
-  	optee_core@de000000 {
-  		reg = <0xde000000 0x02000000>;   // 32 MB secure DDR
-  		no-map;
-  	};
-  
-  	optee_shm@dfc00000 {
-  		reg = <0xdfc00000 0x00400000>;   // 4 MB SHM (o 2 MB)
-  		no-map;
-  	};
-  
-      
-		/* USER CODE END reserved-memory */
-	};
-#endif
 	/* USER CODE BEGIN root */
 	
 	aliases {
@@ -141,24 +97,20 @@
 
 	sdmmc2_pins_mx: sdmmc2_mx-0 {
 		pins1 {
-			pinmux = <STM32_PINMUX('A', 8, AF9)>, /* SDMMC2_D4 */
-					 <STM32_PINMUX('B', 3, AF9)>, /* SDMMC2_D2 */
-					 <STM32_PINMUX('B', 4, AF9)>, /* SDMMC2_D3 */
-					 <STM32_PINMUX('B', 9, AF10)>, /* SDMMC2_D5 */
-					 <STM32_PINMUX('B', 15, AF9)>, /* SDMMC2_D1 */
-					 <STM32_PINMUX('C', 7, AF10)>, /* SDMMC2_D7 */
-					 <STM32_PINMUX('E', 5, AF9)>; /* SDMMC2_D6 */
-			bias-disable;
-			drive-push-pull;
+			pinmux = <STM32_PINMUX('B', 14, AF9)>, /* SDMMC2_D0 */
+				 <STM32_PINMUX('B', 15, AF9)>, /* SDMMC2_D1 */
+				 <STM32_PINMUX('B', 3, AF9)>, /* SDMMC2_D2 */
+				 <STM32_PINMUX('B', 4, AF9)>, /* SDMMC2_D3 */
+				 <STM32_PINMUX('G', 6, AF10)>; /* SDMMC2_CMD */
 			slew-rate = <1>;
+			drive-push-pull;
+			bias-pull-up;
 		};
 		pins2 {
-			pinmux = <STM32_PINMUX('B', 14, AF9)>, /* SDMMC2_D0 */
-					 <STM32_PINMUX('E', 3, AF9)>, /* SDMMC2_CK */
-					 <STM32_PINMUX('G', 6, AF10)>; /* SDMMC2_CMD */
-			bias-pull-up;
+			pinmux = <STM32_PINMUX('E', 3, AF9)>; /* SDMMC2_CK */
+			slew-rate = <2>;
 			drive-push-pull;
-			slew-rate = <1>;
+			bias-pull-up;
 		};
 	};
 
@@ -439,7 +391,7 @@
 	no-sd;
 	no-sdio;
 	st,neg-edge;
-	bus-width = <8>;
+	bus-width = <4>;
 	vmmc-supply = <&v3v3>;
 	vqmmc-supply = <&vdd>;
 	mmc-ddr-3_3v;

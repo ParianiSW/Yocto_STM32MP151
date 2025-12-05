@@ -305,39 +305,31 @@
 		};
 	};
 
-#if 1
 	sdmmc2_pins_mx: sdmmc2_mx-0 {
+	
 		pins1 {
-			pinmux = <STM32_PINMUX('A', 8, AF9)>, /* SDMMC2_D4 */
-					 <STM32_PINMUX('B', 3, AF9)>, /* SDMMC2_D2 */
-					 <STM32_PINMUX('B', 4, AF9)>, /* SDMMC2_D3 */
-					 <STM32_PINMUX('B', 9, AF10)>, /* SDMMC2_D5 */
-					 <STM32_PINMUX('B', 15, AF9)>, /* SDMMC2_D1 */
-					 <STM32_PINMUX('C', 7, AF10)>, /* SDMMC2_D7 */
-					 <STM32_PINMUX('E', 5, AF9)>; /* SDMMC2_D6 */
-			bias-disable;
-			drive-push-pull;
+			pinmux = <STM32_PINMUX('B', 14, AF9)>, /* SDMMC2_D0 */
+				 <STM32_PINMUX('B', 15, AF9)>, /* SDMMC2_D1 */
+				 <STM32_PINMUX('B', 3, AF9)>, /* SDMMC2_D2 */
+				 <STM32_PINMUX('B', 4, AF9)>, /* SDMMC2_D3 */
+				 <STM32_PINMUX('G', 6, AF10)>; /* SDMMC2_CMD */
 			slew-rate = <1>;
+			drive-push-pull;
+			bias-pull-up;
 		};
 		pins2 {
-			pinmux = <STM32_PINMUX('B', 14, AF9)>, /* SDMMC2_D0 */
-					 <STM32_PINMUX('E', 3, AF9)>, /* SDMMC2_CK */
-					 <STM32_PINMUX('G', 6, AF10)>; /* SDMMC2_CMD */
-			bias-pull-up;
+			pinmux = <STM32_PINMUX('E', 3, AF9)>; /* SDMMC2_CK */
+			slew-rate = <2>;
 			drive-push-pull;
-			slew-rate = <1>;
+			bias-pull-up;
 		};
 	};
-
+	/*still in push pull mode?*/
 	sdmmc2_opendrain_pins_mx: sdmmc2_opendrain_mx-0 {
 		pins1 {
-			pinmux = <STM32_PINMUX('A', 8, AF9)>, /* SDMMC2_D4 */
-					 <STM32_PINMUX('B', 3, AF9)>, /* SDMMC2_D2 */
+			pinmux = <STM32_PINMUX('B', 3, AF9)>, /* SDMMC2_D2 */
 					 <STM32_PINMUX('B', 4, AF9)>, /* SDMMC2_D3 */
-					 <STM32_PINMUX('B', 9, AF10)>, /* SDMMC2_D5 */
 					 <STM32_PINMUX('B', 15, AF9)>, /* SDMMC2_D1 */
-					 <STM32_PINMUX('C', 7, AF10)>, /* SDMMC2_D7 */
-					 <STM32_PINMUX('E', 5, AF9)>; /* SDMMC2_D6 */
 			bias-disable;
 			drive-push-pull;
 			slew-rate = <1>;
@@ -359,19 +351,15 @@
 
 	sdmmc2_sleep_pins_mx: sdmmc2_sleep_mx-0 {
 		pins {
-			pinmux = <STM32_PINMUX('A', 8, ANALOG)>, /* SDMMC2_D4 */
-					 <STM32_PINMUX('B', 3, ANALOG)>, /* SDMMC2_D2 */
+			pinmux =  <STM32_PINMUX('B', 3, ANALOG)>, /* SDMMC2_D2 */
 					 <STM32_PINMUX('B', 4, ANALOG)>, /* SDMMC2_D3 */
-					 <STM32_PINMUX('B', 9, ANALOG)>, /* SDMMC2_D5 */
 					 <STM32_PINMUX('B', 14, ANALOG)>, /* SDMMC2_D0 */
 					 <STM32_PINMUX('B', 15, ANALOG)>, /* SDMMC2_D1 */
-					 <STM32_PINMUX('C', 7, ANALOG)>, /* SDMMC2_D7 */
 					 <STM32_PINMUX('E', 3, ANALOG)>, /* SDMMC2_CK */
-					 <STM32_PINMUX('E', 5, ANALOG)>, /* SDMMC2_D6 */
 					 <STM32_PINMUX('G', 6, ANALOG)>; /* SDMMC2_CMD */
 		};
 	};
-#endif
+
 	uart4_pins_mx: uart4_mx-0 {
 		pins1 {
 			pinmux = <STM32_PINMUX('A', 11, AF6)>; /* UART4_RX */
@@ -490,7 +478,7 @@
 	status = "okay";
 
 	/* USER CODE BEGIN dts */
-	/*Cosa è?*/
+	/*Digital temperature sensor*/
 	/* USER CODE END dts */
 };
 
@@ -768,7 +756,7 @@
 	no-sd;
 	no-sdio;
 	st,neg-edge;
-	bus-width = <8>;
+	bus-width = <4>;
 	vmmc-supply = <&v3v3>;
 	vqmmc-supply = <&vdd>;
 	mmc-ddr-3_3v;
@@ -791,7 +779,7 @@
 	/* USER CODE BEGIN uart4 */
 	/delete-property/ dmas;
 	/delete-property/ dma-names;
-	u-boot,dm-pre-reloc;
+	u-boot,bootph-pre-ram;
 	/* USER CODE END uart4 */
 };
 
@@ -819,7 +807,7 @@
 	phys = <&usbphyc_port1 0>;
 	phy-names = "usb2-phy";
 	usb-role-switch;
-	u-boot,dm-pre-reloc;                        
+	u-boot,bootph-pre-ram;                        
 	u-boot,force-b-session-valid;
 	hnp-srp-disable;
 	dr_mode = "peripheral";  
@@ -887,12 +875,12 @@
 };
 
 &uart4_pins_mx {
-	u-boot,dm-pre-reloc;
+	u-boot,bootph-pre-ram;
 	pins1 {
-		u-boot,dm-pre-reloc;
+		u-boot,bootph-pre-ram;
 	};
 	pins2 {
-		u-boot,dm-pre-reloc;
+		u-boot,bootph-pre-ram;
 	};
 };
 &gpioz {
@@ -910,22 +898,5 @@
 	resets = <&scmi_reset RST_SCMI_RNG1>;
 };
 
-/*
-&sdmmc2 {
-        pinctrl-names = "default", "opendrain", "sleep";
-        pinctrl-0 = <&sdmmc2_b4_pins_a &sdmmc2_d47_pins_a>;
-        pinctrl-1 = <&sdmmc2_b4_od_pins_a &sdmmc2_d47_pins_a>;
-        pinctrl-2 = <&sdmmc2_b4_sleep_pins_a &sdmmc2_d47_sleep_pins_a>;
-        non-removable;
-        no-sd;
-        no-sdio;
-        st,neg-edge;
-        bus-width = <8>;
-        vmmc-supply = <&v3v3>;
-        vqmmc-supply = <&v3v3>;
-        mmc-ddr-3_3v;
-        status = "okay";
-};
-*/
 /* USER CODE END addons */
 
