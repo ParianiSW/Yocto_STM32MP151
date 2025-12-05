@@ -80,11 +80,6 @@
 			access-controllers-conf-load = <&etzpc DECPROT(STM32MP1_ETZPC_RETRAM_ID, DECPROT_S_RW, DECPROT_UNLOCK)>;
 		};
 
-		gpu_reserved:gpu@d4000000{
-			reg = <0xd4000000 0x4000000>;
-			no-map;
-		};
-
 		/* USER CODE END reserved-memory */
 	};
 
@@ -93,24 +88,12 @@
 	aliases{
 		serial0 = &uart4;
 	};
-
-	chosen {
-		stdout-path = "serial0:115200n8";
-	};
-	
-	vin: vin {
-		compatible = "regulator-fixed";
-		regulator-name = "vin";
-		regulator-min-microvolt = <5000000>;
-		regulator-max-microvolt = <5000000>;
-		regulator-always-on;
-	};
 	
 	led {
 		compatible = "gpio-leds";
 		led-blue {
 			label = "heartbeat";
-			gpios = <&gpioa 14 GPIO_ACTIVE_LOW>;
+			gpios = <&gpioz 6 GPIO_ACTIVE_LOW>;
 			linux,default-trigger = "heartbeat";
 			default-state = "off";
 		};
@@ -125,6 +108,19 @@
 			st,shadow-lock = <STICKY_LOCK_SR>;
 		};
 	};
+
+	vin:vin{
+		compatible = "regulator-fixed";
+		regulator-name = "vin";
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+		regulator-always-on;
+	};
+
+	chosen{
+		stdout-path = "serial0:115200n8";
+	};
+
 	/* USER CODE END root */
 
 	clocks {
@@ -157,26 +153,9 @@
 
 /*Warning: the configuration of the secured GPIOs should be added in (addons) User Section*/
 &pinctrl {
-	i2c4_pins_mx: i2c4_mx-0 {
-		pins {
-			pinmux = <STM32_PINMUX('F', 14, AF4)>, /* I2C4_SCL */
-					 <STM32_PINMUX('F', 15, AF4)>; /* I2C4_SDA */
-			bias-disable;
-			drive-open-drain;
-			slew-rate = <0>;
-		};
-	};
 	rtc_pins_mx: rtc_mx-0 {
 		pins {
 			pinmux = <STM32_PINMUX('I', 8, ANALOG)>; /* RTC_LSCO */
-		};
-	};
-	rcc_pins_mx: rcc_mx-0 {
-		pins {
-			pinmux = <STM32_PINMUX('C', 14, ANALOG)>, /* RCC_OSC32_IN */
-					 <STM32_PINMUX('C', 15, ANALOG)>, /* RCC_OSC32_OUT */
-					 <STM32_PINMUX('H', 0, ANALOG)>, /* RCC_OSC_IN */
-					 <STM32_PINMUX('H', 1, ANALOG)>; /* RCC_OSC_OUT */
 		};
 	};
 
@@ -197,7 +176,16 @@
 };
 
 &pinctrl_z {
-/*Move serial here*/
+	i2c4_pins_z_mx: i2c4_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('Z', 4, AF6)>, /* I2C4_SCL */
+					 <STM32_PINMUX('Z', 5, AF6)>; /* I2C4_SDA */
+			bias-disable;
+			drive-open-drain;
+			slew-rate = <0>;
+		};
+	};
+
 	/* USER CODE BEGIN pinctrl_z */
 	/* USER CODE END pinctrl_z */
 };
@@ -215,6 +203,7 @@
 	huk_otp:huk-otp@f0{
 		reg = <0xf0 0x10>;
 	};
+
 	/* USER CODE END bsec */
 };
 
@@ -225,7 +214,7 @@
 	/*STM32CubeMX generates a basic and standard configuration for ETZPC.
 	Additional device configurations can be added here if needed.
 	"etzpc" node could be also overloaded in "addons" User-Section.*/
-	/*"NS_R S_W" peripherals*/
+	
 	/*"Non Secured" peripherals*/
 	DECPROT(STM32MP1_ETZPC_ADC_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
 	DECPROT(STM32MP1_ETZPC_CRYP1_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
@@ -243,27 +232,38 @@
 	DECPROT(STM32MP1_ETZPC_UART4_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
 	DECPROT(STM32MP1_ETZPC_USART2_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
 	DECPROT(STM32MP1_ETZPC_OTG_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
-	
-	DECPROT(STM32MP1_ETZPC_VREFBUF_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
-
-	DECPROT(STM32MP1_ETZPC_DDRCTRL_ID, DECPROT_NS_R_S_W, DECPROT_LOCK)
-	DECPROT(STM32MP1_ETZPC_DDRPHYC_ID, DECPROT_NS_R_S_W, DECPROT_LOCK)
-	
 	DECPROT(STM32MP1_ETZPC_USART1_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
 	DECPROT(STM32MP1_ETZPC_SPI6_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
 	DECPROT(STM32MP1_ETZPC_I2C6_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
 	DECPROT(STM32MP1_ETZPC_HASH1_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
 
-	/*"Secured" peripherals*/
-	/*DECPROT(STM32MP1_ETZPC_STGENC_ID, DECPROT_S_RW, DECPROT_LOCK)
-	DECPROT(STM32MP1_ETZPC_BKPSRAM_ID, DECPROT_S_RW, DECPROT_LOCK)
-	DECPROT(STM32MP1_ETZPC_IWDG1_ID, DECPROT_S_RW, DECPROT_LOCK)*/
-	DECPROT(STM32MP1_ETZPC_IWDG1_ID, DECPROT_S_RW, DECPROT_UNLOCK)
-	DECPROT(STM32MP1_ETZPC_RNG1_ID, DECPROT_S_RW, DECPROT_UNLOCK)
-	DECPROT(STM32MP1_ETZPC_STGENC_ID, DECPROT_S_RW, DECPROT_UNLOCK)
-	/*"Mcu Isolation" peripherals*/
-	DECPROT(STM32MP1_ETZPC_DMA2_ID, DECPROT_MCU_ISOLATION, DECPROT_UNLOCK)
+	DECPROT(STM32MP1_ETZPC_VREFBUF_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
+    
+  /*"NS_R S_W" peripherals*/
+	DECPROT(STM32MP1_ETZPC_DDRCTRL_ID, DECPROT_NS_R_S_W, DECPROT_LOCK)
+	DECPROT(STM32MP1_ETZPC_DDRPHYC_ID, DECPROT_NS_R_S_W, DECPROT_LOCK)
+	
 
+	/*"Secured" peripherals*/
+  
+  /*
+	DECPROT(STM32MP1_ETZPC_IWDG1_ID, DECPROT_S_RW, DECPROT_UNLOCK)
+  DECPROT(STM32MP1_ETZPC_STGENC_ID, DECPROT_S_RW, DECPROT_UNLOCK)
+  */
+	DECPROT(STM32MP1_ETZPC_RNG1_ID, DECPROT_S_RW, DECPROT_UNLOCK)
+  DECPROT(STM32MP1_ETZPC_STGENC_ID, DECPROT_S_RW, DECPROT_LOCK)
+	DECPROT(STM32MP1_ETZPC_IWDG1_ID, DECPROT_S_RW, DECPROT_LOCK)
+
+  
+  /*"Mcu Isolation" peripherals*/
+  /*
+   * IMPORTANTE:
+   * MDMA (DMA2_ID) sembra NON possa essere messo in MCU isolation su STM32MP151,
+   * perché MDMA è usato dal mondo Linux e condiviso con Linux drivers.
+   */
+  /*
+	DECPROT(STM32MP1_ETZPC_DMA2_ID, DECPROT_MCU_ISOLATION, DECPROT_UNLOCK)
+  */
 	/*Restriction: following IDs are not managed  - please to use User-Section if needed:
 	STM32MP1_ETZPC_SRAMx_ID  STM32MP1_ETZPC_RETRAM_ID  STM32MP1_ETZPC_BKPSRAM_ID*/
 	/* USER CODE END etzpc_decprot */
@@ -275,7 +275,7 @@
 
 &i2c4{
 	pinctrl-names = "default";
-	pinctrl-0 = <&i2c4_pins_a>;
+	pinctrl-0 = <&i2c4_pins_z_mx>;
 	status = "okay";
 
 	/* USER CODE BEGIN i2c4 */
@@ -289,7 +289,7 @@
 	pmic: stpmic@33 {
 	compatible = "st,stpmic1";
 	reg = <0x33>;
-	/* interrupts-extended = <&exti_pwr 55 IRQ_TYPE_EDGE_FALLING>;*/
+	/* interrupts-extended = <&gpioa 0 IRQ_TYPE_EDGE_FALLING>;*/
 	interrupts-extended = <&exti 55 IRQ_TYPE_EDGE_FALLING>;
 	interrupt-controller;
 	#interrupt-cells = <2>;
@@ -564,8 +564,6 @@
 };
 
 &rcc{
-	pinctrl-names = "default";
-	pinctrl-0 = <&rcc_pins_mx>;
 	status = "okay";
 	/* USER CODE BEGIN rcc */
 	compatible = "st,stm32mp1-rcc-secure";
@@ -697,9 +695,6 @@
 };
 
 /* USER CODE BEGIN addons */
-&clk_hse {
-	st,digbypass;
-};
 
 &cpu0 {
 	cpu-supply = <&vddcore>;

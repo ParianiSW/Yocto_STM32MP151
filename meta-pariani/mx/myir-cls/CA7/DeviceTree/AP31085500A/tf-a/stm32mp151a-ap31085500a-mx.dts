@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-3-Clause)
 /*
- * Copyright (C) 2024, STMicroelectronics - All Rights Reserved
+ * Copyright (C) 2025, STMicroelectronics - All Rights Reserved
  * Author: STM32CubeMX code generation for STMicroelectronics.
  */
 
@@ -85,16 +85,6 @@
 }; /*root*/
 
 &pinctrl {
-	i2c4_pins_mx: i2c4_mx-0 {
-		pins {
-			pinmux = <STM32_PINMUX('F', 14, AF4)>, /* I2C4_SCL */
-					 <STM32_PINMUX('F', 15, AF4)>; /* I2C4_SDA */
-			bias-disable;
-			drive-open-drain;
-			slew-rate = <0>;
-		};
-	};
-
 	sdmmc2_pins_mx: sdmmc2_mx-0 {
 		pins1 {
 			pinmux = <STM32_PINMUX('B', 14, AF9)>, /* SDMMC2_D0 */
@@ -139,14 +129,22 @@
 
 
 &pinctrl_z {
-/*move i2c4 here*/
 	/* USER CODE BEGIN pinctrl_z */
+		i2c4_pins_z_mx: i2c4_mx-0 {
+		pins {
+			pinmux = 	<STM32_PINMUX('Z', 4, AF6)>, /* I2C4_SCL */
+							<STM32_PINMUX('Z', 5, AF6)>; /* I2C4_SDA */
+			bias-disable;
+			drive-open-drain;
+			slew-rate = <0>;
+		};
+	};
 	/* USER CODE END pinctrl_z */
 };
 
 &i2c4{
 	pinctrl-names = "default";
-	pinctrl-0 = <&i2c4_pins_a>;
+	pinctrl-0 = <&i2c4_pins_z_mx>;
 	status = "okay";
 
 	/* USER CODE BEGIN i2c4 */
@@ -158,7 +156,6 @@
 	compatible = "st,stpmic1";
 	reg = <0x33>;
 	interrupts-extended = <&exti_pwr 55 IRQ_TYPE_EDGE_FALLING>;
-/*	interrupts-extended = <&exti 55 IRQ_TYPE_EDGE_FALLING>; */
 	interrupt-controller;
 	#interrupt-cells = <2>;
 	status = "okay";

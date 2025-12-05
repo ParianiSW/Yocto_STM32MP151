@@ -24,7 +24,7 @@
 /*KERNEL*/
 
 / {
-	model = "STMicroelectronics custom STM32CubeMX board - openstlinux-6.1-yocto-mickledore-mpu-v24.06.26";
+	model = "STMicroelectronics custom STM32CubeMX board - openstlinux-6.6-yocto-scarthgap-mpu-v25.06.11";
 	compatible = "st,stm32mp151a-ap31085500a-mx", "st,stm32mp151";
 
 	memory@c0000000 {
@@ -41,11 +41,6 @@
 		ranges;
 
 		/* USER CODE BEGIN reserved-memory */
-		optee@de000000 {
-			reg = <0xde000000 0x2000000>;
-			no-map;
-		};
-		
 		mcuram2:mcuram2@10000000{
 			compatible = "shared-dma-pool";
 			reg = <0x10000000 0x40000>;
@@ -87,6 +82,19 @@
 			reg = <0x38000000 0x10000>;
 			no-map;
 		};
+
+		linux,cma{
+			compatible = "shared-dma-pool";
+			reusable;
+			size = <0x8000000>;
+			alignment = <0x2000>;
+			linux,cma-default;
+		};
+
+		optee@de000000{
+			reg = <0xde000000 0x2000000>;
+			no-map;
+		};
 		/* USER CODE END reserved-memory */
 	};
 
@@ -102,7 +110,7 @@
 	
 	config {
 		u-boot,boot-led = "heartbeat";
-		u-boot,error-led = "error";
+	/*	u-boot,error-led = "error";*/
 		u-boot,mmc-env-partition = "u-boot-env";
 		st,fastboot-gpios = <&gpioa 13 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
 		st,stm32prog-gpios = <&gpioa 14 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
@@ -113,16 +121,16 @@
 
 		led-blue{
 			label = "heartbeat";
-			gpios = <&gpioa 14 GPIO_ACTIVE_LOW>;
-			linux,default-trigger = "timer"; /* Change from heartbeat -> timer */
+			gpios = <&gpioz 6 GPIO_ACTIVE_LOW>;
+			linux,default-trigger = "heartbeat"; 
 			default-state = "off";
 		};
-		
+	/*	
 		led-red {
 			label = "error";
 			gpios = <&gpioa 13 GPIO_ACTIVE_LOW>;
 			default-state = "off";
-		};
+		};*/
 	};
 	
 	vin:vin{
@@ -252,23 +260,6 @@
 		};
 	};
 
-	i2c4_pins_mx: i2c4_mx-0 {
-		pins {
-			pinmux = <STM32_PINMUX('F', 14, AF4)>, /* I2C4_SCL */
-					 <STM32_PINMUX('F', 15, AF4)>; /* I2C4_SDA */
-			bias-disable;
-			drive-open-drain;
-			slew-rate = <0>;
-		};
-	};
-
-	i2c4_sleep_pins_mx: i2c4_sleep_mx-0 {
-		pins {
-			pinmux = <STM32_PINMUX('F', 14, ANALOG)>, /* I2C4_SCL */
-					 <STM32_PINMUX('F', 15, ANALOG)>; /* I2C4_SDA */
-		};
-	};
-	
 	sdmmc2_pins_mx: sdmmc2_mx-0 {
 	
 		pins1 {
@@ -293,7 +284,7 @@
 		pins1 {
 			pinmux = <STM32_PINMUX('B', 3, AF9)>, /* SDMMC2_D2 */
 					 <STM32_PINMUX('B', 4, AF9)>, /* SDMMC2_D3 */
-					 <STM32_PINMUX('B', 15, AF9)>, /* SDMMC2_D1 */
+					 <STM32_PINMUX('B', 15, AF9)>; /* SDMMC2_D1 */
 			bias-disable;
 			drive-push-pull;
 			slew-rate = <1>;
@@ -370,8 +361,23 @@
 };
 
 &pinctrl_z {
-
 	/* USER CODE BEGIN pinctrl_z */
+	i2c4_pins_z_mx: i2c4_mx-0 {
+		pins {
+			pinmux = 	<STM32_PINMUX('Z', 4, AF6)>, /* I2C4_SCL */
+							<STM32_PINMUX('Z', 5, AF6)>; /* I2C4_SDA */
+			bias-disable;
+			drive-open-drain;
+			slew-rate = <0>;
+		};
+	};
+
+	i2c4_sleep_pins_z_mx: i2c4_sleep_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('Z', 4, ANALOG)>, /* I2C4_SCL */
+					 <STM32_PINMUX('Z', 5, ANALOG)>; /* I2C4_SDA */
+		};
+	};
 	/* USER CODE END pinctrl_z */
 };
 
@@ -384,18 +390,17 @@
 	/*/delete-property/ st,syscfg-holdboot;*/
 	mboxes = <&ipcc 0>, <&ipcc 1>, <&ipcc 2>, <&ipcc 3>;
 	mbox-names = "vq0", "vq1", "shutdown", "detach";
-	memory-region = <&retram>, <&mcuram>, <&mcuram2>, <&vdev0vring0>, <&vdev0vring1>, <&vdev0buffer>, <&mcu_rsc_table>;
+	memory-region = <&retram>, <&mcuram>, <&mcuram2>, <&vdev0vring0>,
+			<&vdev0vring1>, <&vdev0buffer>, <&mcu_rsc_table>;
 	interrupt-parent = <&exti>;
 	interrupts = <68 1>;
 	wakeup-source;
+	resets = <&scmi_reset RST_SCMI_MCU>,
+			<&scmi_reset RST_SCMI_MCU_HOLD_BOOT>;
+	reset-names = "mcu_rst", "hold_boot";
+	/delete-property/ st,syscfg-holdboot;
 	/* USER CODE END m4_rproc */
 
-	m4_system_resources{
-		status = "okay";
-
-		/* USER CODE BEGIN m4_system_resources */
-		/* USER CODE END m4_system_resources */
-	};
 };
 
 &bsec{
@@ -416,12 +421,11 @@
 	status = "okay";
 
 	/* USER CODE BEGIN dma1 */
-	resets = <&scmi_reset RST_SCMI_MDMA>;
 	/* USER CODE END dma1 */
 };
 
 &dma2{
-	status = "disabled";
+	status = "okay";
 
 	/* USER CODE BEGIN dma2 */
 	/* USER CODE END dma2 */
@@ -430,11 +434,18 @@
 &dmamux1{
 	status = "okay";
 
-	dma-masters = <&dma1>;
-	dma-channels = <8>;
+	dma-masters = <&dma1 &dma2>;
+	dma-channels = <16>;
 
 	/* USER CODE BEGIN dmamux1 */
 	/* USER CODE END dmamux1 */
+};
+
+&dts {
+	status = "okay";
+
+	/* USER CODE BEGIN dts */
+	/* USER CODE END dts */
 };
 
 &ethernet0{
@@ -481,19 +492,44 @@
 
 &i2c4{
 	pinctrl-names = "default", "sleep";
-	pinctrl-0 = <&i2c4_pins_mx>;
-	pinctrl-1 = <&i2c4_sleep_pins_mx>;
+	pinctrl-0 = <&i2c4_pins_z_mx>;
+	pinctrl-1 = <&i2c4_sleep_pins_z_mx>;
 	status = "okay";
 
 	/* USER CODE BEGIN i2c4 */
-	clocks = <&scmi_clk CK_SCMI_I2C4>;
-	resets = <&scmi_reset RST_SCMI_I2C4>;
 	i2c-scl-rising-time-ns = <185>;
 	i2c-scl-falling-time-ns = <20>;
 	clock-frequency = <400000>;
 	/delete-property/ dmas;
 	/delete-property/ dma-names;
+	clocks = <&scmi_clk CK_SCMI_I2C4>;
+	resets = <&scmi_reset RST_SCMI_I2C4>;
+/*
+	stusb1600@28{
+		compatible = "st,stusb1600";
+		reg = <0x28>;
+		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
+		interrupt-parent = <&gpioi>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&stusb1600_pins_a>;
+		status = "okay";
+		vdd-supply = <&vin>;
 
+		connector{
+			compatible = "usb-c-connector";
+			label = "USB-C";
+			power-role = "dual";
+			typec-power-opmode = "default";
+
+			port{
+
+				con_usbotg_hs_ep:endpoint{
+					remote-endpoint = <&usbotg_hs_ep>;
+				};
+			};
+		};
+	};
+*/
 	pmic: stpmic@33 {
 	compatible = "st,stpmic1";
 	reg = <0x33>;
@@ -510,12 +546,16 @@
 			buck2-supply = <&vin>;
 			buck3-supply = <&vin>;
 			buck4-supply = <&vin>;
+			ldo1-supply = <&v3v3>;
 			ldo2-supply  = <&vin>;
-			ldo3-supply  = <&vdd>;         /* VTT_DDR must be fed from BUCK3 */
+			ldo3-supply = <&vdd_ddr>;
 			ldo4-supply  = <&vin>;
 			ldo5-supply  = <&vin>;
 			ldo6-supply  = <&v3v3>;
-			vref_ddr-supply = <&vdd_ddr>;  /* VREF must follow VDD_DDR */
+			vref_ddr-supply = <&vin>;
+			boost-supply = <&vin>;
+			pwr_sw1-supply = <&bst_out>;
+			pwr_sw2-supply = <&bst_out>;
 
 			vddcore: buck1 {
 				regulator-name = "vddcore";
@@ -525,9 +565,6 @@
 				regulator-initial-mode = <0>;
 				regulator-over-current-protection;
 
-				lp-stop {
-					regulator-on-in-suspend;
-				};
 			};
 
 			vdd_ddr: buck2 {
@@ -538,9 +575,6 @@
 				regulator-initial-mode = <0>;
 				regulator-over-current-protection;
 
-				lp-stop {
-					regulator-on-in-suspend;
-				};
 			};
 
 			vdd: buck3 {
@@ -551,9 +585,6 @@
 				st,mask-reset;
 				regulator-initial-mode = <0>;
 				regulator-over-current-protection;
-				lp-stop {
-					regulator-on-in-suspend;
-				};
 			};
 
 			v3v3: buck4 {
@@ -563,21 +594,15 @@
 				regulator-always-on;
 				regulator-over-current-protection;
 				regulator-initial-mode = <0>;
-
-				lp-stop {
-					regulator-on-in-suspend;
-				};
 			};
 
-			/*
-			v1v8_audio: ldo1 {
+			v1v8_audio:ldo1{
 				regulator-name = "v1v8_audio";
 				regulator-min-microvolt = <1800000>;
 				regulator-max-microvolt = <1800000>;
 				regulator-always-on;
 				interrupts = <IT_CURLIM_LDO1 0>;
 			};
-			*/
 
 			v3v3_hdmi: ldo2 {
 				regulator-name = "v3v3_hdmi";
@@ -585,29 +610,23 @@
 				regulator-max-microvolt = <3300000>;
 				regulator-always-on;
 				interrupts = <IT_CURLIM_LDO2 0>;
-				/* nessuna gestione di suspend dal secure world */
 			};
 
-			vtt_ddr: ldo3 {
+			vtt_ddr:ldo3{
 				regulator-name = "vtt_ddr";
-				regulator-always-on;
-				st,regulator-sink-source;
 				regulator-min-microvolt = <500000>;
 				regulator-max-microvolt = <750000>;
-				
-				/* nessuna gestione di suspend: resta sempre on */
+				regulator-always-on;
+				regulator-over-current-protection;
 			};
 
 			vdd_usb: ldo4 {
 				regulator-name = "vdd_usb";
-				regulator-always-on;
 				interrupts = <IT_CURLIM_LDO4 0>;
-				/* nessuna gestione di suspend dal secure world */
 			};
 
 			vdda: ldo5 {
 				regulator-name = "vdda";
-				regulator-always-on;
 				regulator-min-microvolt = <2900000>;
 				regulator-max-microvolt = <2900000>;
 				interrupts = <IT_CURLIM_LDO5 0>;
@@ -622,17 +641,12 @@
 				interrupts = <IT_CURLIM_LDO6 0>;
 			};
 
-			vref_ddr: vref_ddr {
+			vref_ddr:vref-ddr{
 				regulator-name = "vref_ddr";
 				regulator-always-on;
-
-				lp-stop {
-					regulator-on-in-suspend;
-				};
 			};
 
-			/*
-			bst_out: boost {
+			bst_out:boost{
 				regulator-name = "bst_out";
 				interrupts = <IT_OCP_BOOST 0>;
 			};
@@ -647,7 +661,6 @@
 				interrupts = <IT_OCP_SWOUT 0>;
 				regulator-active-discharge = <1>;
 			};
-			*/
 		};
 	};
 
@@ -660,24 +673,32 @@
 	/* USER CODE END i2s2 */
 };
 
-&ltdc{
+&ipcc {
+	status = "okay";
+
+	/* USER CODE BEGIN ipcc */
+	/* USER CODE END ipcc */
+};
+
+&ltdc {
 	status = "disabled";
 	/* USER CODE BEGIN ltdc */
 
 	/* USER CODE END ltdc */
 };
-
+#if 0
 &m4_dma2{
 	status = "okay";
 
 	/* USER CODE BEGIN m4_dma2 */
 	/* USER CODE END m4_dma2 */
 };
-
+#endif
 &mdma1{
 	status = "okay";
 
 	/* USER CODE BEGIN mdma1 */
+	resets = <&scmi_reset RST_SCMI_MDMA>;
 	/* USER CODE END mdma1 */
 };
 
@@ -704,14 +725,6 @@
 	/* USER CODE END rcc */
 };
 
-&rng1{
-	status = "okay";
-
-	/* USER CODE BEGIN rng1 */
-	clocks = <&scmi_clk CK_SCMI_RNG1>;
-	resets = <&scmi_reset RST_SCMI_RNG1>;
-	/* USER CODE END rng1 */
-};
 
 &rtc{
 	status = "okay";
@@ -778,7 +791,7 @@
 };
 
 &usbh_ohci{
-
+/*to be verified*/
 	/* USER CODE BEGIN usbh_ohci */
 	status = "disabled";
 	/* USER CODE END usbh_ohci */
@@ -842,15 +855,26 @@
 };
 
 /* USER CODE BEGIN addons */
-/*
+
 &arm_wdt{
 	timeout-sec = <32>;
 	status = "okay";
 };
-*/
+
 &cpu0 {
 	cpu-supply = <&vddcore>;
 	clocks = <&scmi_clk CK_SCMI_MPU>;
+};
+
+
+&iwdg2 {
+	clocks = <&rcc IWDG2>, <&scmi_clk CK_SCMI_LSI>;
+};
+
+&rng1 {
+	status = "okay";
+	clocks = <&scmi_clk CK_SCMI_RNG1>;
+	resets = <&scmi_reset RST_SCMI_RNG1>;
 };
 
 &uart4_pins_mx {

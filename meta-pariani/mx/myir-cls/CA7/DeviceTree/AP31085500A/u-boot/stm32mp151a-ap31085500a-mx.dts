@@ -119,7 +119,7 @@
 	
 	config {
 		u-boot,boot-led = "heartbeat";
-		u-boot,error-led = "error";
+	/*	u-boot,error-led = "error";*/
 		u-boot,mmc-env-partition = "u-boot-env";
 		st,fastboot-gpios = <&gpioa 13 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
 		st,stm32prog-gpios = <&gpioa 14 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
@@ -130,17 +130,17 @@
 
 		led-blue{
 			label = "heartbeat";
-			gpios = <&gpioa 14 GPIO_ACTIVE_LOW>;
+			gpios = <&gpioz 6 GPIO_ACTIVE_LOW>;
 			linux,default-trigger = "heartbeat";
 			/*linux,default-trigger = "timer";  Change from heartbeat -> timer */
 			default-state = "off";
 		};
-		
+		/*
 		led-red {
 			label = "error";
 			gpios = <&gpioa 13 GPIO_ACTIVE_LOW>;
 			default-state = "off";
-		};
+		};*/
 	};
 	
 	vin:vin{
@@ -276,15 +276,6 @@
 		};
 	};
 
-	i2c4_pins_mx: i2c4_mx-0 {
-		pins {
-			pinmux = <STM32_PINMUX('Z', 4, AF6)>, /* I2C4_SCL */
-					 <STM32_PINMUX('Z', 5, AF6)>; /* I2C4_SDA */
-			bias-disable;
-			drive-open-drain;
-			slew-rate = <0>;
-		};
-	};
 	rtc_pins_mx: rtc_mx-0 {
 		pins {
 			pinmux = <STM32_PINMUX('I', 8, ANALOG)>; /* RTC_LSCO */
@@ -297,13 +288,6 @@
 		};
 	};
 	
-
-	i2c4_sleep_pins_mx: i2c4_sleep_mx-0 {
-		pins {
-			pinmux = <STM32_PINMUX('Z', 4, ANALOG)>, /* I2C4_SCL */
-					 <STM32_PINMUX('Z', 5, ANALOG)>; /* I2C4_SDA */
-		};
-	};
 
 	sdmmc2_pins_mx: sdmmc2_mx-0 {
 	
@@ -329,7 +313,7 @@
 		pins1 {
 			pinmux = <STM32_PINMUX('B', 3, AF9)>, /* SDMMC2_D2 */
 					 <STM32_PINMUX('B', 4, AF9)>, /* SDMMC2_D3 */
-					 <STM32_PINMUX('B', 15, AF9)>, /* SDMMC2_D1 */
+					 <STM32_PINMUX('B', 15, AF9)>; /* SDMMC2_D1 */
 			bias-disable;
 			drive-push-pull;
 			slew-rate = <1>;
@@ -408,8 +392,24 @@
 
 &pinctrl_z {
 
-/*I2C4, spostami qui*/
+
 	/* USER CODE BEGIN pinctrl_z */
+	i2c4_pins_z_mx: i2c4_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('Z', 4, AF6)>, /* I2C4_SCL */
+					 <STM32_PINMUX('Z', 5, AF6)>; /* I2C4_SDA */
+			bias-disable;
+			drive-open-drain;
+			slew-rate = <0>;
+		};
+	};
+
+	i2c4_sleep_pins_z_mx: i2c4_sleep_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('Z', 4, ANALOG)>, /* I2C4_SCL */
+					 <STM32_PINMUX('Z', 5, ANALOG)>; /* I2C4_SDA */
+		};
+	};
 	/* USER CODE END pinctrl_z */
 };
 
@@ -530,8 +530,8 @@
 
 &i2c4{
 	pinctrl-names = "default", "sleep";
-	pinctrl-0 = <&i2c4_pins_mx>;
-	pinctrl-1 = <&i2c4_sleep_pins_mx>;
+	pinctrl-0 = <&i2c4_pins_z_mx>;
+	pinctrl-1 = <&i2c4_sleep_pins_z_mx>;
 	status = "okay";
 
 	/* USER CODE BEGIN i2c4 */
@@ -542,7 +542,32 @@
 	/delete-property/ dma-names;
 	clocks = <&scmi_clk CK_SCMI_I2C4>;
 	resets = <&scmi_reset RST_SCMI_I2C4>;
+/*
+	stusb1600@28{
+		compatible = "st,stusb1600";
+		reg = <0x28>;
+		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
+		interrupt-parent = <&gpioi>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&stusb1600_pins_a>;
+		status = "okay";
+		vdd-supply = <&vin>;
 
+		connector{
+			compatible = "usb-c-connector";
+			label = "USB-C";
+			power-role = "dual";
+			typec-power-opmode = "default";
+
+			port{
+
+				con_usbotg_hs_ep:endpoint{
+					remote-endpoint = <&usbotg_hs_ep>;
+				};
+			};
+		};
+	};
+*/
 	pmic: stpmic@33 {
 	compatible = "st,stpmic1";
 	reg = <0x33>;
