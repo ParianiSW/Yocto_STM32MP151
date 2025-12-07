@@ -44,7 +44,6 @@
 		ranges;
 
 		/* USER CODE BEGIN reserved-memory */
-
 		mcuram2:mcuram2@10000000{
 			compatible = "shared-dma-pool";
 			reg = <0x10000000 0x40000>;
@@ -84,11 +83,6 @@
 		retram:retram@38000000{
 			compatible = "shared-dma-pool";
 			reg = <0x38000000 0x10000>;
-			no-map;
-		};
-
-		gpu_reserved:gpu@d4000000{
-			reg = <0xd4000000 0x4000000>;
 			no-map;
 		};
 
@@ -197,8 +191,6 @@
 
 }; /*root*/
 
-
-
 &pinctrl {
 
 	eth1_pins_mx: eth1_mx-0 {
@@ -288,7 +280,6 @@
 		};
 	};
 	
-
 	sdmmc2_pins_mx: sdmmc2_mx-0 {
 	
 		pins1 {
@@ -391,13 +382,11 @@
 };
 
 &pinctrl_z {
-
-
 	/* USER CODE BEGIN pinctrl_z */
 	i2c4_pins_z_mx: i2c4_mx-0 {
 		pins {
 			pinmux = <STM32_PINMUX('Z', 4, AF6)>, /* I2C4_SCL */
-					 <STM32_PINMUX('Z', 5, AF6)>; /* I2C4_SDA */
+				<STM32_PINMUX('Z', 5, AF6)>; /* I2C4_SDA */
 			bias-disable;
 			drive-open-drain;
 			slew-rate = <0>;
@@ -422,7 +411,8 @@
 	/*/delete-property/ st,syscfg-holdboot;*/
 	mboxes = <&ipcc 0>, <&ipcc 1>, <&ipcc 2>, <&ipcc 3>;
 	mbox-names = "vq0", "vq1", "shutdown", "detach";
-	memory-region = <&retram>, <&mcuram>, <&mcuram2>, <&vdev0vring0>, <&vdev0vring1>, <&vdev0buffer>, <&mcu_rsc_table>;
+	memory-region = <&retram>, <&mcuram>, <&mcuram2>, <&vdev0vring0>,
+			<&vdev0vring1>, <&vdev0buffer>, <&mcu_rsc_table>;
 	interrupt-parent = <&exti>;
 	interrupts = <68 1>;
 	wakeup-source;
@@ -432,10 +422,12 @@
 		status = "okay";
 
 		/* USER CODE BEGIN m4_system_resources */
+		/* sottonodi rproc-srm-dev, periferiche che assegni a M4
+		serve al kernel, opzionalmente a uboot */
 		/* USER CODE END m4_system_resources */
 	};
 };
-
+/*OTP*/
 &bsec{
 	status = "okay";
 
@@ -579,6 +571,7 @@
 
 		regulators {
 			compatible = "st,stpmic1-regulators";
+			
 			buck1-supply = <&vin>;
 			buck2-supply = <&vin>;
 			buck3-supply = <&vin>;
@@ -681,7 +674,6 @@
 				regulator-always-on;
 
 			};
-
 			
 			bst_out: boost {
 				regulator-name = "bst_out";
@@ -698,10 +690,8 @@
 				interrupts = <IT_OCP_SWOUT 0>;
 				regulator-active-discharge = <1>;
 			};
-			
 		};
 	};
-
 
 	/* USER CODE END i2c4 */
 };
@@ -718,19 +708,22 @@
 	/* USER CODE BEGIN ipcc */
 	/* USER CODE END ipcc */
 };
-&ltdc{
-	/* USER CODE BEGIN ltdc */
+
+&ltdc {
 	status = "disabled";
+	/* USER CODE BEGIN ltdc */
+
 	/* USER CODE END ltdc */
 };
-
+#if 0
+/*Verificare...*/
 &m4_dma2{
 	status = "okay";
 
 	/* USER CODE BEGIN m4_dma2 */
 	/* USER CODE END m4_dma2 */
 };
-
+#endif
 &mdma1{
 	status = "okay";
 
@@ -777,6 +770,7 @@
 	pinctrl-2 = <&sdmmc2_sleep_pins_mx>;
 	status = "okay";
 
+	/* USER CODE BEGIN sdmmc2 */
 	non-removable;
 	no-sd;
 	no-sdio;
@@ -785,6 +779,7 @@
 	vmmc-supply = <&v3v3>;
 	vqmmc-supply = <&vdd>;
 	mmc-ddr-3_3v;
+	/* USER CODE END sdmmc2 */
 };
 
 &tamp{
@@ -812,13 +807,22 @@
 	status = "okay";
 
 	/* USER CODE BEGIN usbh_ehci */
+	phys = <&usbphyc_port0>;
+	#address-cells = <1>;
+	#size-cells = <0>;
+	/* onboard HUB */
+	hub@1 {
+		compatible = "usb424,2514";
+		reg = <1>;
+		vdd-supply = <&v3v3>;
+	};
 	/* USER CODE END usbh_ehci */
 };
 
 &usbh_ohci{
-	status = "okay";
-
+/*to be verified*/
 	/* USER CODE BEGIN usbh_ohci */
+	status = "ok";
 	/* USER CODE END usbh_ohci */
 };
 
@@ -915,7 +919,6 @@
 &iwdg2 {
 	clocks = <&rcc IWDG2>, <&scmi_clk CK_SCMI_LSI>;
 };
-
 
 &rng1 {
 	status = "okay";
