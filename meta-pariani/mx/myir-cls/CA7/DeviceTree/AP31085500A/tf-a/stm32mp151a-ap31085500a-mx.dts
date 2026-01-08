@@ -47,7 +47,7 @@
 		stdout-path = "serial0:115200n8";
 	};
 	
-	vin: vin {
+	vin:vin{
 		compatible = "regulator-fixed";
 		regulator-name = "vin";
 		regulator-min-microvolt = <5000000>;
@@ -81,6 +81,14 @@
 			/* USER CODE END clk_hse */
 		};
 	};
+	 /* ADC add  */
+	 vrefbuf: vrefbuf@5c003000 {
+	 	 compatible = "st,stm32-vrefbuf";
+	 	 reg = <0x5c003000 0x100>;
+	 	 status = "okay";
+	 	 st,enable-supply;
+	 	 st,high-impedance-disable;
+	 };
 
 }; /*root*/
 
@@ -117,23 +125,17 @@
 		};
 	};
 
-	usb_otg_hs_pins_mx: usb_otg_hs_mx-0 {
-		pins {
-			pinmux = <STM32_PINMUX('A', 10, ANALOG)>; /* USB_OTG_HS_ID */
-		};
-	};
 
 	/* USER CODE BEGIN pinctrl */
 	/* USER CODE END pinctrl */
 };
 
-
 &pinctrl_z {
 	/* USER CODE BEGIN pinctrl_z */
-		i2c4_pins_z_mx: i2c4_mx-0 {
+	i2c4_pins_z_mx: i2c4_mx-0 {
 		pins {
-			pinmux = 	<STM32_PINMUX('Z', 4, AF6)>, /* I2C4_SCL */
-							<STM32_PINMUX('Z', 5, AF6)>; /* I2C4_SDA */
+			pinmux = <STM32_PINMUX('Z', 4, AF6)>, /* I2C4_SCL */
+				<STM32_PINMUX('Z', 5, AF6)>; /* I2C4_SDA */
 			bias-disable;
 			drive-open-drain;
 			slew-rate = <0>;
@@ -155,7 +157,8 @@
 	pmic: stpmic@33 {
 	compatible = "st,stpmic1";
 	reg = <0x33>;
-	interrupts-extended = <&exti_pwr 55 IRQ_TYPE_EDGE_FALLING>;
+	/* interrupts-extended = <&exti_pwr 55 IRQ_TYPE_EDGE_FALLING>;*/
+	interrupts-extended = <&exti 55 IRQ_TYPE_EDGE_FALLING>;
 	interrupt-controller;
 	#interrupt-cells = <2>;
 	status = "okay";
@@ -186,7 +189,7 @@
 				regulator-over-current-protection;
 			};
 
-			vdd_ddr:buck2{
+			vdd_ddr: buck2 {
 				regulator-name = "vdd_ddr";
 				regulator-min-microvolt = <1350000>;
 				regulator-max-microvolt = <1350000>;
@@ -214,41 +217,43 @@
 				regulator-initial-mode = <0>;
 			};
 
-			v1v8_audio:ldo1{
+			v1v8_audio: ldo1 {
 				regulator-name = "v1v8_audio";
 				regulator-min-microvolt = <1800000>;
 				regulator-max-microvolt = <1800000>;
 				regulator-always-on;
 			};
 
-			v3v3_hdmi:ldo2{
+			v3v3_hdmi: ldo2 {
 				regulator-name = "v3v3_hdmi";
 				regulator-min-microvolt = <3300000>;
 				regulator-max-microvolt = <3300000>;
 				regulator-always-on;
 			};
 
-			vtt_ddr:ldo3{
+			vtt_ddr: ldo3 {
 				regulator-name = "vtt_ddr";
+				regulator-min-microvolt = <500000>;
+				regulator-max-microvolt = <750000>;
 				regulator-always-on;
 				regulator-over-current-protection;
 				st,regulator-sink-source;
 			};
 
-			vdd_usb:ldo4{
+			vdd_usb: ldo4 {
 				regulator-name = "vdd_usb";
 				regulator-min-microvolt = <3300000>;
 				regulator-max-microvolt = <3300000>;
 			};
 
-			vdda:ldo5{
+			vdda: ldo5 {
 				regulator-name = "vdda";
-				regulator-min-microvolt = <2900000>;
-				regulator-max-microvolt = <2900000>;
+				regulator-min-microvolt = <3300000>;
+				regulator-max-microvolt = <3300000>;
 				regulator-boot-on;
 			};
 
-			v1v2_hdmi:ldo6{
+			v1v2_hdmi: ldo6 {
 				regulator-name = "v1v2_hdmi";
 				regulator-min-microvolt = <1200000>;
 				regulator-max-microvolt = <1200000>;
@@ -277,6 +282,23 @@
 
 	/* USER CODE END i2c4 */
 };
+
+/* ADC da CubeMX*/
+
+&etzpc {
+	vrefbuf: vrefbuf@5c003000 {
+		compatible = "st,stm32-vrefbuf";
+		reg = <0x5c003000 0x100>;
+		status = "okay";
+		secure-status = "non-secure";
+	};
+};
+&vrefbuf {
+	st,high-impedance-disable;
+	status = "okay";
+};
+/*******************************/
+
 
 &iwdg1 {
 	status = "okay";
@@ -326,9 +348,10 @@
 			divmn = < 1 33 >;
 			frac = < 0x1a04 >;
 		};
-		pll4_vco_594Mhz: pll4-vco-594Mhz {
+		pll4_vco_750Mhz: pll4-vco-750Mhz {
 			src = < CLK_PLL4_HSE >;
-			divmn = < 3 98 >;
+			divmn = < 1 61 >;
+			frac = < 0x1000 >;
 		};
 		/* USER CODE BEGIN rcc_st-pll_vco */
 		/* USER CODE END rcc_st-pll_vco */
@@ -369,13 +392,12 @@
 		st,pll = < &pll4_cfg1 >;
 
 		pll4_cfg1: pll4_cfg1 {
-			st,pll_vco = < &pll4_vco_594Mhz >;
-			st,pll_div_pqr = < 5 7 7 >;
+			st,pll_vco = < &pll4_vco_750Mhz >;
+			st,pll_div_pqr = < 5 8 7 >;
 		};
 		/* USER CODE BEGIN pll4 */
 		/* USER CODE END pll4 */
 	};
-
 };
 
 &sdmmc2{
@@ -406,7 +428,6 @@
 
 &usbotg_hs{
 	pinctrl-names = "default";
-	pinctrl-0 = <&usb_otg_hs_pins_mx>;
 	status = "okay";
 
 	/* USER CODE BEGIN usbotg_hs */
