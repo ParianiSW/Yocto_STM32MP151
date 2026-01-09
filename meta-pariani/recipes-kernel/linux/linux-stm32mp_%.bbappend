@@ -39,6 +39,8 @@ SRC_URI += "file://fragment-82-nosound.config"
 SRC_URI += "file://fragment-83-norf.config"
 SRC_URI += "file://fragment-90-most.config"
 
+#patches
+SRC_URI += "file://0001-most-most_usb-remove-io_mutex-usage-in-the-wq_clear_.patch"
 
 # -------------------------------------------------------------
 # Pariani kernel configuration banner

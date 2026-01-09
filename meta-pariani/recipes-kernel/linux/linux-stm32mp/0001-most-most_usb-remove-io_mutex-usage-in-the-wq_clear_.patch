@@ -1,0 +1,38 @@
+From 1053abf7be7ac0334a2bd2a67708c0e8373b433f Mon Sep 17 00:00:00 2001
+From: Parthiban Veerasooran <parthiban.veerasooran@microchip.com>
+Date: Wed, 24 Apr 2024 11:25:19 +0530
+Subject: [PATCH] most: most_usb: remove io_mutex usage in the wq_clear_halt()
+
+io_mutex usage in the wq_clear_halt() function creates a race
+with hdm_enqueue_thread() in the core.c and leads to deadlock.
+io_mutex usage is removed as it may not be needed in the
+wq_clear_halt() function.
+
+Signed-off-by: Parthiban Veerasooran <parthiban.veerasooran@microchip.com>
+---
+ drivers/most/most_usb.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/drivers/most/most_usb.c b/drivers/most/most_usb.c
+index 485d5ca39..2e6e4ae22 100644
+--- a/drivers/most/most_usb.c
++++ b/drivers/most/most_usb.c
+@@ -734,7 +734,6 @@ static void wq_clear_halt(struct work_struct *wq_obj)
+ 	int snd_pipe;
+ 	int peer;
+ 
+-	mutex_lock(&mdev->io_mutex);
+ 	most_stop_enqueue(&mdev->iface, channel);
+ 	usb_kill_anchored_urbs(&mdev->busy_urbs[channel]);
+ 	if (usb_clear_halt(mdev->usb_device, pipe))
+@@ -760,7 +759,6 @@ static void wq_clear_halt(struct work_struct *wq_obj)
+ 	}
+ 	mdev->is_channel_healthy[channel] = true;
+ 	most_resume_enqueue(&mdev->iface, channel);
+-	mutex_unlock(&mdev->io_mutex);
+ }
+ 
+ /*
+-- 
+2.39.2
+
