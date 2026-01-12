@@ -13,6 +13,7 @@ PV = "1.0+git${SRCPV}"
 inherit cmake pkgconfig
 
 DEPENDS += "mosquitto"
+RDEPENDS:${PN} += "mosquitto"
 
 S = "${WORKDIR}/git"
 
