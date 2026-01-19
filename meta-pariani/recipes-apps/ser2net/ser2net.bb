@@ -18,19 +18,13 @@ S = "${WORKDIR}/git"
 #SYSTEMD_SERVICE:${PN} = "ser2net.service"
 #SYSTEMD_AUTO_ENABLE:${PN} = "disable"
 
-do_install:append() {
-    install -d ${D}${sysconfdir}
-    install -m 0644 ${S}/ser2net.yaml \
-        ${D}${sysconfdir}/ser2net.yaml
-}
-
 
 do_install:append() {
-    install -d ${D}${sysconfdir}
+    install -d ${D}${sysconfdir}/ser2net
     install -m 0644 ${S}/ser2net.yaml \
-        ${D}${sysconfdir}/ser2net.yaml
+        ${D}${sysconfdir}/ser2net/ser2net.yaml
 }
 
-FILES:${PN} += "${sysconfdir}/ser2net.yaml"
+FILES:${PN} += "${sysconfdir}/ser2net/ser2net.yaml"
 #if modified by the user, avoid overwrite from .deb
 CONFFILES:${PN} += "${sysconfdir}/ser2net/ser2net.yaml"
