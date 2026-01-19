@@ -12,13 +12,18 @@ PV = "1.0+git${SRCPV}"
 inherit cmake pkgconfig
 
 DEPENDS += "mosquitto"
-RDEPENDS:${PN} += "mosquitto"
 
 S = "${WORKDIR}/git"
 
-EXTRA_OECMAKE = "-DNO_RAW_CLOCK=OFF"
+EXTRA_OECMAKE += "-DNO_RAW_CLOCK=OFF"
 
 do_install() {
     install -d ${D}${bindir}
     install -m 0755 ${B}/unicensc ${D}${bindir}/unicensc
+    install -m 0755 ${B}/unicensd ${D}${bindir}/unicensd
 }
+
+PACKAGES += "${PN}-client"
+
+FILES:${PN} = "${bindir}/unicensd"
+FILES:${PN}-client = "${bindir}/unicensc"
